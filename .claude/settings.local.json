@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init)",
+      "Bash(npx expo customize:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(del tailwind.config.js global.css nativewind-env.d.ts)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
