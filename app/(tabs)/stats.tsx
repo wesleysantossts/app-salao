@@ -1,10 +1,10 @@
-import { Dimensions } from 'react-native';
-import styled from 'styled-components/native';
 import { ThemedText } from '@/components/themed-text';
 import { useApp } from '@/context/app-context';
-import { LineChart, BarChart } from 'react-native-chart-kit';
-import { startOfMonth, endOfMonth, eachMonthOfInterval, subMonths, format } from 'date-fns';
+import { eachMonthOfInterval, endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Dimensions } from 'react-native';
+import { BarChart, LineChart } from 'react-native-chart-kit';
+import styled from 'styled-components/native';
 
 export default function StatsScreen() {
   const { appointments } = useApp();
@@ -34,6 +34,12 @@ export default function StatsScreen() {
       revenue: totalRevenue,
     };
   });
+
+  const appointmentsChartData = monthlyData.map((d) => d.totalAppointments);
+  const revenueChartData = monthlyData.map((d) => d.revenue);
+
+  const hasAppointmentsData = appointmentsChartData.some(v => v > 0);
+  const hasRevenueData = revenueChartData.some(v => v > 0);
 
   const totalAppointments = appointments.length;
   const completedAppointments = appointments.filter((apt) => apt.status === 'completed').length;
@@ -96,7 +102,7 @@ export default function StatsScreen() {
             labels: monthlyData.map((d) => d.month),
             datasets: [
               {
-                data: monthlyData.map((d) => d.totalAppointments),
+                data: hasAppointmentsData ? appointmentsChartData : [0],
               },
             ],
           }}
@@ -106,6 +112,8 @@ export default function StatsScreen() {
           style={{ borderRadius: 16 }}
           showValuesOnTopOfBars
           fromZero
+          yAxisLabel=""
+          yAxisSuffix=""
         />
       </ChartSection>
 
@@ -118,7 +126,7 @@ export default function StatsScreen() {
             labels: monthlyData.map((d) => d.month),
             datasets: [
               {
-                data: monthlyData.map((d) => d.revenue),
+                data: hasRevenueData ? revenueChartData : [0],
               },
             ],
           }}
@@ -129,6 +137,8 @@ export default function StatsScreen() {
           style={{ borderRadius: 16 }}
           formatYLabel={(value) => `R$${value}`}
           fromZero
+          yAxisLabel=""
+          yAxisSuffix=""
         />
       </ChartSection>
 

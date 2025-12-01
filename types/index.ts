@@ -23,3 +23,25 @@ export interface MonthlyStats {
   totalAppointments: number;
   revenue: number;
 }
+
+export interface Service {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+}
+
+export interface WorkingHours {
+  day: string;
+  isOpen: boolean;
+  openTime: string;
+  closeTime: string;
+}
+
+export interface SalonConfig {
+  id: string;
+  salonName: string;
+  slug: string;
+  workingHours: WorkingHours[];
+  services: Service[];
+}

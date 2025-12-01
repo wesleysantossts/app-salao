@@ -1,19 +1,23 @@
-import { useState } from 'react';
-import { Alert, Modal } from 'react-native';
-import styled from 'styled-components/native';
-import { ThemedText } from '@/components/themed-text';
-import { useApp } from '@/context/app-context';
 import { AppointmentCard } from '@/components/appointment-card';
 import { DatePicker } from '@/components/date-picker';
+import { ThemedText } from '@/components/themed-text';
+import { useApp } from '@/context/app-context';
+import { Appointment } from '@/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Appointment } from '@/types';
+import { useState } from 'react';
+import { Alert, Modal } from 'react-native';
+import MaskInput, { Masks } from 'react-native-mask-input';
+import styled from 'styled-components/native';
+
+const TIME_MASK = [/\d/, /\d/, ':', /\d/, /\d/];
 
 export default function AppointmentsScreen() {
-  const { appointments, addAppointment, updateAppointment, deleteAppointment } = useApp();
+  const { appointments, addAppointment, updateAppointment, deleteAppointment, salonConfig } = useApp();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [showServicePicker, setShowServicePicker] = useState(false);
   const [formData, setFormData] = useState({
     clientName: '',
     clientPhone: '',
@@ -34,13 +38,23 @@ export default function AppointmentsScreen() {
         clientPhone: appointment.clientPhone,
         service: appointment.service,
         time: appointment.time,
-        price: appointment.price.toString(),
+        price: (appointment.price * 100).toFixed(0),
       });
     } else {
       setEditingAppointment(null);
       setFormData({ clientName: '', clientPhone: '', service: '', time: '', price: '' });
     }
     setModalVisible(true);
+    setShowServicePicker(false);
+  };
+
+  const handleSelectService = (serviceName: string, servicePrice: number) => {
+    setFormData({
+      ...formData,
+      service: serviceName,
+      price: (servicePrice * 100).toFixed(0),
+    });
+    setShowServicePicker(false);
   };
 
   const handleSave = async () => {
@@ -49,13 +63,15 @@ export default function AppointmentsScreen() {
       return;
     }
 
+    const priceValue = parseFloat(formData.price.replace(/\D/g, '')) / 100;
+
     const appointmentData = {
       clientName: formData.clientName,
       clientPhone: formData.clientPhone,
       service: formData.service,
       date: format(selectedDate, 'yyyy-MM-dd'),
       time: formData.time,
-      price: parseFloat(formData.price),
+      price: priceValue,
       status: 'scheduled' as const,
     };
 
@@ -150,32 +166,86 @@ export default function AppointmentsScreen() {
               placeholderTextColor="#999"
             />
 
-            <Input
+            <MaskInput
               value={formData.clientPhone}
-              onChangeText={(text: string) => setFormData({ ...formData, clientPhone: text })}
+              onChangeText={(masked: string) => setFormData({ ...formData, clientPhone: masked })}
+              mask={Masks.BRL_PHONE}
               placeholder="Telefone"
               placeholderTextColor="#999"
               keyboardType="phone-pad"
+              style={{
+                borderWidth: 1,
+                borderColor: '#ddd',
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 16,
+                backgroundColor: '#fff',
+                color: '#000',
+              }}
             />
 
-            <Input
-              value={formData.service}
-              onChangeText={(text: string) => setFormData({ ...formData, service: text })}
-              placeholder="Serviço *"
-              placeholderTextColor="#999"
-            />
+            {salonConfig && salonConfig.services.length > 0 ? (
+              <ServicePickerContainer>
+                <ServiceButton onPress={() => setShowServicePicker(!showServicePicker)}>
+                  <ServiceButtonText>
+                    {formData.service || 'Selecionar Serviço *'}
+                  </ServiceButtonText>
+                  <ServiceButtonIcon>{showServicePicker ? '▲' : '▼'}</ServiceButtonIcon>
+                </ServiceButton>
+                {showServicePicker && (
+                  <ServiceList>
+                    {salonConfig.services.map((service) => (
+                      <ServiceOption
+                        key={service.id}
+                        onPress={() => handleSelectService(service.name, service.price)}>
+                        <ServiceOptionName>{service.name}</ServiceOptionName>
+                        <ServiceOptionPrice>R$ {service.price.toFixed(2)}</ServiceOptionPrice>
+                      </ServiceOption>
+                    ))}
+                  </ServiceList>
+                )}
+              </ServicePickerContainer>
+            ) : (
+              <Input
+                value={formData.service}
+                onChangeText={(text: string) => setFormData({ ...formData, service: text })}
+                placeholder="Serviço *"
+                placeholderTextColor="#999"
+              />
+            )}
 
-            <Input
+            <MaskInput
               value={formData.time}
-              onChangeText={(text: string) => setFormData({ ...formData, time: text })}
+              onChangeText={(masked: string) => setFormData({ ...formData, time: masked })}
+              mask={TIME_MASK}
               placeholder="Horário (ex: 14:00) *"
               placeholderTextColor="#999"
+              keyboardType="number-pad"
+              style={{
+                borderWidth: 1,
+                borderColor: '#ddd',
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 16,
+                backgroundColor: '#fff',
+                color: '#000',
+              }}
             />
 
-            <Input
-              value={formData.price}
-              onChangeText={(text: string) => setFormData({ ...formData, price: text })}
-              placeholder="Valor *"
+            <PriceInput
+              value={(() => {
+                const cleanValue = formData.price.replace(/\D/g, '');
+                const numberValue = parseFloat(cleanValue || '0') / 100;
+                return numberValue.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+              })()}
+              onChangeText={(text: string) => {
+                const cleanValue = text.replace(/\D/g, '');
+                setFormData({ ...formData, price: cleanValue });
+              }}
+              placeholder="Valor (R$) *"
               placeholderTextColor="#999"
               keyboardType="numeric"
             />
@@ -305,4 +375,68 @@ const SecondaryButtonText = styled.Text`
   color: #000;
   font-size: 16px;
   font-weight: 600;
+`;
+
+const ServicePickerContainer = styled.View`
+  gap: 8px;
+`;
+
+const ServiceButton = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-width: 1px;
+  border-color: #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #fff;
+`;
+
+const ServiceButtonText = styled.Text`
+  font-size: 16px;
+  color: #000;
+`;
+
+const ServiceButtonIcon = styled.Text`
+  font-size: 12px;
+  color: #666;
+`;
+
+const ServiceList = styled.View`
+  border-width: 1px;
+  border-color: #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  max-height: 200px;
+`;
+
+const ServiceOption = styled.TouchableOpacity`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom-width: 1px;
+  border-bottom-color: #f0f0f0;
+`;
+
+const ServiceOptionName = styled.Text`
+  font-size: 16px;
+  color: #000;
+  flex: 1;
+`;
+
+const ServiceOptionPrice = styled.Text`
+  font-size: 16px;
+  font-weight: 600;
+  color: #34C759;
+`;
+
+const PriceInput = styled.TextInput`
+  border-width: 1px;
+  border-color: #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #fff;
+  color: #000;
 `;

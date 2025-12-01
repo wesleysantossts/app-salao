@@ -4,9 +4,10 @@ import styled from 'styled-components/native';
 import { ThemedText } from '@/components/themed-text';
 import { useApp } from '@/context/app-context';
 import { User } from '@/types';
+import { signOut } from '@/services/auth';
 
 export default function ProfileScreen() {
-  const { user, updateUser } = useApp();
+  const { user, updateUser, authUser } = useApp();
   const [formData, setFormData] = useState<User>({
     id: user?.id || Date.now().toString(),
     name: user?.name || '',
@@ -32,10 +33,38 @@ export default function ProfileScreen() {
     Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Sair',
+      'Deseja realmente sair da sua conta?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível sair da conta');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <Container>
       <Header>
-        <ThemedText type="title">Meu Perfil</ThemedText>
+        <HeaderContent>
+          <ThemedText type="title">Meu Perfil</ThemedText>
+          {authUser && (
+            <UserInfo>
+              <UserEmail>{authUser.email}</UserEmail>
+            </UserInfo>
+          )}
+        </HeaderContent>
       </Header>
 
       <Form>
@@ -98,6 +127,10 @@ export default function ProfileScreen() {
         <SaveButton onPress={handleSave}>
           <SaveButtonText>Salvar</SaveButtonText>
         </SaveButton>
+
+        <LogoutButton onPress={handleLogout}>
+          <LogoutButtonText>Sair da Conta</LogoutButtonText>
+        </LogoutButton>
       </Form>
     </Container>
   );
@@ -110,6 +143,19 @@ const Container = styled.ScrollView`
 const Header = styled.View`
   padding: 20px;
   padding-top: 60px;
+`;
+
+const HeaderContent = styled.View`
+  gap: 8px;
+`;
+
+const UserInfo = styled.View`
+  gap: 4px;
+`;
+
+const UserEmail = styled.Text`
+  font-size: 14px;
+  color: #666;
 `;
 
 const Form = styled.View`
@@ -157,6 +203,20 @@ const SaveButton = styled.TouchableOpacity`
 `;
 
 const SaveButtonText = styled.Text`
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
+const LogoutButton = styled.TouchableOpacity`
+  background-color: #FF3B30;
+  padding: 16px;
+  border-radius: 8px;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const LogoutButtonText = styled.Text`
   color: #fff;
   font-size: 16px;
   font-weight: 600;

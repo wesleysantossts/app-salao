@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { CalendarIcon, ChartIcon, ProfileIcon, SalonIcon } from '@/components/tab-icons';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -20,21 +20,28 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Agendamentos',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
+          tabBarIcon: ({ color }) => <CalendarIcon color={color} size={28} />,
         }}
       />
       <Tabs.Screen
         name="stats"
         options={{
           title: 'Estatísticas',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
+          tabBarIcon: ({ color }) => <ChartIcon color={color} size={28} />,
+        }}
+      />
+      <Tabs.Screen
+        name="salon"
+        options={{
+          title: 'Salão',
+          tabBarIcon: ({ color }) => <SalonIcon color={color} size={28} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          tabBarIcon: ({ color }) => <ProfileIcon color={color} size={28} />,
         }}
       />
     </Tabs>
