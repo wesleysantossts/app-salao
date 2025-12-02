@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Alert, ActivityIndicator, Image } from 'react-native';
+import { Alert, ActivityIndicator } from 'react-native';
 import styled from 'styled-components/native';
 import { ThemedText } from '@/components/themed-text';
 import { signInWithGoogle } from '@/services/auth';
 import Svg, { Path } from 'react-native-svg';
+import { colors, typography } from '@/constants/colors';
 
 function GoogleIcon({ size = 24 }: { size?: number }) {
   return (
@@ -170,5 +171,6 @@ const Footer = styled.View`
 
 const FooterText = styled.Text`
   font-size: 12px;
-  color: #999;
+  font-family: ${typography.fontFamily.regular};
+  color: ${colors.textLight};
 `;

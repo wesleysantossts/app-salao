@@ -127,10 +127,6 @@ export default function SalonScreen() {
 
   return (
     <Container>
-      <Header>
-        <ThemedText type="title">Gestão do Salão</ThemedText>
-      </Header>
-
       <Content>
         <Section>
           <SectionTitle>
@@ -290,11 +286,7 @@ export default function SalonScreen() {
 
 const Container = styled.ScrollView`
   flex: 1;
-`;
-
-const Header = styled.View`
-  padding: 20px;
-  padding-top: 60px;
+  padding-bottom: 80px;
 `;
 
 const Content = styled.View`

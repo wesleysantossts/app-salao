@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useApp } from '@/context/app-context';
+import { signOut } from '@/services/auth';
+import { User } from '@/types';
+import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import styled from 'styled-components/native';
-import { ThemedText } from '@/components/themed-text';
-import { useApp } from '@/context/app-context';
-import { User } from '@/types';
-import { signOut } from '@/services/auth';
 
 export default function ProfileScreen() {
   const { user, updateUser, authUser } = useApp();
@@ -56,17 +55,6 @@ export default function ProfileScreen() {
 
   return (
     <Container>
-      <Header>
-        <HeaderContent>
-          <ThemedText type="title">Meu Perfil</ThemedText>
-          {authUser && (
-            <UserInfo>
-              <UserEmail>{authUser.email}</UserEmail>
-            </UserInfo>
-          )}
-        </HeaderContent>
-      </Header>
-
       <Form>
         <InputGroup>
           <Label>Nome do Salão *</Label>
@@ -138,19 +126,12 @@ export default function ProfileScreen() {
 
 const Container = styled.ScrollView`
   flex: 1;
+  padding-bottom: 80px;
 `;
 
-const Header = styled.View`
-  padding: 20px;
-  padding-top: 60px;
-`;
-
-const HeaderContent = styled.View`
-  gap: 8px;
-`;
-
-const UserInfo = styled.View`
-  gap: 4px;
+const UserInfoHeader = styled.View`
+  padding: 16px 20px;
+  background-color: #f8f9fa;
 `;
 
 const UserEmail = styled.Text`

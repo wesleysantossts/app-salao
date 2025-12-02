@@ -4,7 +4,6 @@ import { ThemedText } from '@/components/themed-text';
 import { useApp } from '@/context/app-context';
 import { Appointment } from '@/types';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useState } from 'react';
 import { Alert, Modal } from 'react-native';
 import MaskInput, { Masks } from 'react-native-mask-input';
@@ -112,13 +111,6 @@ export default function AppointmentsScreen() {
 
   return (
     <Container>
-      <Header>
-        <ThemedText type="title">Agendamentos</ThemedText>
-        <DateTitle>
-          {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
-        </DateTitle>
-      </Header>
-
       <DatePicker selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
       <List contentContainerStyle={{ padding: 20 }}>
@@ -267,17 +259,18 @@ export default function AppointmentsScreen() {
 
 const Container = styled.View`
   flex: 1;
+  padding-bottom: 80px;
 `;
 
-const Header = styled.View`
-  padding: 20px;
-  padding-top: 60px;
-  gap: 4px;
+const DateHeader = styled.View`
+  padding: 16px 20px;
+  background-color: #f8f9fa;
 `;
 
 const DateTitle = styled.Text`
   font-size: 16px;
-  color: #666;
+  font-weight: 600;
+  color: #333;
   text-transform: capitalize;
 `;
 
@@ -299,11 +292,12 @@ const EmptyText = styled.Text`
 const FAB = styled.TouchableOpacity`
   position: absolute;
   right: 20px;
-  bottom: 20px;
+  bottom: 100px;
   width: 60px;
   height: 60px;
   border-radius: 30px;
   background-color: #007AFF;
+  display: flex;
   align-items: center;
   justify-content: center;
   shadow-color: #000;
@@ -317,6 +311,9 @@ const FABText = styled.Text`
   font-size: 32px;
   color: #fff;
   font-weight: 300;
+  width: 100%;
+  height: 85%;
+  text-align: center;
 `;
 
 const ModalOverlay = styled.View`

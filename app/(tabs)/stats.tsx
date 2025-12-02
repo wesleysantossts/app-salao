@@ -67,10 +67,6 @@ export default function StatsScreen() {
 
   return (
     <Container>
-      <Header>
-        <ThemedText type="title">Estatísticas</ThemedText>
-      </Header>
-
       <CardsContainer>
         <Card>
           <CardValue>{totalAppointments}</CardValue>
@@ -165,11 +161,7 @@ export default function StatsScreen() {
 
 const Container = styled.ScrollView`
   flex: 1;
-`;
-
-const Header = styled.View`
-  padding: 20px;
-  padding-top: 60px;
+  padding-bottom: 80px;
 `;
 
 const CardsContainer = styled.View`
